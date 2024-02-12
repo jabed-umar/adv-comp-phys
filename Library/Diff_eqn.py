@@ -50,9 +50,9 @@ class DifferentialEquation1():
         x = [self.x0]
         y = [self.y0]
         for i in range(1, len(self.x)):
+            x.append(self.x[i])
             # y[i] = y[i-1] + h*f(x[i], y[i])
             self.y[i] = (self.y[i-1] + self.h*self.func(self.x[i], self.y[i]))
-            x.append(self.x[i])
             y.append(self.y[i])
         plt.plot(x, y, label='Backward Euler')
         plt.xlabel('x')
@@ -228,6 +228,7 @@ class BoundaryValue:
         y = [self.alpha]
         z = [self.z0]
         for i in range(1, len(self.x)):
+            x.append(self.x[i])
             k1 = self.h*self.dydx(self.x[i-1], self.y[i-1], self.z[i-1])
             l1 = self.h*self.d2ydx2(self.x[i-1], self.y[i-1], self.z[i-1])
             k2 = self.h*self.dydx(self.x[i-1] + (self.h/2), self.y[i-1] + (k1/2), self.z[i-1] + (l1/2))
@@ -238,7 +239,6 @@ class BoundaryValue:
             l4 = self.h*self.d2ydx2(self.x[i-1] + self.h, self.y[i-1] + k3, self.z[i-1] + l3)
             self.y[i] = self.y[i-1] + (k1 + 2*k2 + 2*k3 + k4)/6
             self.z[i] = self.z[i-1] + (l1 + 2*l2 + 2*l3 + l4)/6
-            x.append(self.x[i])
             y.append(self.y[i])
             z.append(self.z[i])
             return x, y, z
@@ -270,4 +270,64 @@ class BoundaryValue:
     #     return x, y
     # ## needs to complete
 
-    
+    import numpy as np
+
+class CrankNicolsonSolver:
+    def __init__(self, g, n, T, alpha, gamma):
+        """This function solves the heat equation using the Crank-Nicolson method.
+
+    Args:
+        g (class): The initial condition of the heat equation or g(x) = u(x, 0)
+        n (int): the number of steps in the x-direction
+        T (int): the number of steps in the t-direction
+        alpha (float): delta(t)/delta(x)^2 (time step divided by space step squared)
+        gamma (float): the coefficient of $frac{\partial^2 u}{\partial x^2}$
+
+    Returns:
+        array: a list of solutions to the heat equation
+    """
+        self.g = g
+        self.n = n
+        self.T = T
+        self.alpha = alpha
+        self.gamma = gamma
+
+    def heat_eqn_solve(self):
+        m = self.alpha * self.gamma
+        # Initialize vector 'u' with values
+        u = np.zeros(self.n)
+        for i in range(len(u)):
+            u[i] = self.g(i)
+
+        # Create identity matrix 'I' and tridiagonal matrix 'B'
+            '''
+    The matrix A is a tridiagonal matrix with  `2 + m' on the diagonal and `-m' on the off-diagonals
+    The matrix B is a tridiagonal matrix with `2 - m' on the diagonal and `m' on the off-diagonals
+    '''
+        I = np.identity(self.n)
+        B = np.zeros((self.n, self.n))
+        for i in range(self.n):
+            B[i, i] = 2
+        for j in range(self.n - 1):
+            B[j, j + 1] = -1
+        for j in range(1, self.n):
+            B[j, j - 1] = -1
+
+        # Construct matrices 'm1' and 'm2' for the Crank-Nicolson method
+        A1 = 2 * I - m * B
+        A2 = np.linalg.inv(2 * I + m * B)
+
+        # Initialize vector 'u' with values and an empty list 'solutions' to store solutions
+        u = np.array(u)
+        solutions = []
+        i = 0
+
+        # Perform iterations to solve the linear system using Crank-Nicolson method
+        while i < self.T:
+            u = A1 @ A2 @ u
+            solutions.append(u)
+            i += 1   # Increment the time step by 1, i.e. delta(t) = 1
+
+        # Return the list of solutions
+        return solutions
+
