@@ -306,6 +306,7 @@ class CrankNicolsonSolver:
     '''
         I = np.identity(self.n)
         B = np.zeros((self.n, self.n))
+        #construct the tridiagonal matrix B
         for i in range(self.n):
             B[i, i] = 2
         for j in range(self.n - 1):
@@ -313,7 +314,7 @@ class CrankNicolsonSolver:
         for j in range(1, self.n):
             B[j, j - 1] = -1
 
-        # Construct matrices 'm1' and 'm2' for the Crank-Nicolson method
+        # Construct matrices 'A1' and 'A2' for the Crank-Nicolson method
         A1 = 2 * I - m * B
         A2 = np.linalg.inv(2 * I + m * B)
 
