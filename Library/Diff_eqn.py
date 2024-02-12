@@ -270,7 +270,9 @@ class BoundaryValue:
     #     return x, y
     # ## needs to complete
 
-    import numpy as np
+ 
+
+
 
 class CrankNicolsonSolver:
     def __init__(self, g, n, T, alpha, gamma):
@@ -332,3 +334,88 @@ class CrankNicolsonSolver:
         # Return the list of solutions
         return solutions
 
+
+
+
+class PoissonLaplaceSolver:
+    def __init__(self, rho, x_i, x_f, y_i, y_f, u_iy, u_fy, u_xi, u_xf, N):
+        """Parameters:
+    - rho: Function rho(x,y) del^2 u = -rho(x,y)
+    - x_i: Initial x value
+    - x_f: Final x value
+    - y_i: Initial y value
+    - y_f: Final y value
+    - u_iy: Function u_iy(x)
+    - u_fy: Function u_fy(x)
+    '''
+    '''
+    defining the grid N+2 x N+2
+        """
+        self.rho = rho
+        self.x_i = x_i
+        self.x_f = x_f
+        self.y_i = y_i
+        self.y_f = y_f
+        self.u_iy = u_iy
+        self.u_fy = u_fy
+        self.u_xi = u_xi
+        self.u_xf = u_xf
+        self.N = N
+
+    def solve(self):
+        x, y, u = self._solve_poisson_laplace()
+        return x, y, u
+
+    def _solve_poisson_laplace(self):
+        x = np.linspace(self.x_i, self.x_f, self.N+2)
+        y = np.linspace(self.y_i, self.y_f, self.N+2)
+        hx = (self.x_f - self.x_i) / (self.N + 1)
+        hy = (self.y_f - self.y_i) / (self.N + 1)
+        if hx != hy:
+            raise ValueError("The grid is not square")
+        h = hx 
+        A = np.zeros((self.N**2, self.N**2))
+        
+        for i in range(self.N**2):
+            A[i, i] = 4
+            if i == 0:
+                A[i, i+1] = -1
+                A[i, i+self.N] = -1
+            elif i < self.N:
+                A[i, i-1] = -1
+                A[i, i+1] = -1
+                A[i, i+self.N] = -1
+            elif i < (self.N**2 - self.N):
+                A[i, i-1] = -1
+                A[i, i+1] = -1
+                A[i, i-self.N] = -1
+                A[i, i+self.N] = -1
+            elif i < (self.N**2 - 1):
+                A[i, i-1] = -1
+                A[i, i+1] = -1
+                A[i, i-self.N] = -1
+            else:
+                A[i, i-1] = -1
+                A[i, i-self.N] = -1
+        
+        B = []
+        for i in range(1, self.N+1):
+            for j in range(1, self.N+1):
+                s = self.rho(x[i], y[j]) * h**2
+                if i == 0:
+                    s += self.u_xi(y[j])
+                if i == self.N:
+                    s += self.u_xf(y[j])
+                if j == 0:
+                    s += self.u_iy(x[i])
+                if j == self.N:
+                    s += self.u_fy(x[i])
+                B.append(s)    
+        B = np.array(B)[:, None]
+        u = np.linalg.solve(A, B)
+        u = np.array(u).reshape((self.N, self.N))
+        u = np.append(self.u_iy(y[1:-1, None]), u, axis=1)
+        u = np.append(u, self.u_fy(y[1:-1, None]), axis=1)
+        u = np.append([self.u_xi(x)], u, axis=0)
+        u = np.append(u, [self.u_xf(x)], axis=0)
+        return x, y, u
