@@ -347,9 +347,6 @@ class PoissonLaplaceSolver:
     - y_f: Final y value
     - u_iy: Function u_iy(x)
     - u_fy: Function u_fy(x)
-    '''
-    '''
-    defining the grid N+2 x N+2
         """
         self.rho = rho
         self.x_i = x_i
@@ -367,15 +364,20 @@ class PoissonLaplaceSolver:
         return x, y, u
 
     def _solve_poisson_laplace(self):
+        #defing the N+2 grid points
         x = np.linspace(self.x_i, self.x_f, self.N+2)
         y = np.linspace(self.y_i, self.y_f, self.N+2)
+        #defining the step size
         hx = (self.x_f - self.x_i) / (self.N + 1)
         hy = (self.y_f - self.y_i) / (self.N + 1)
+        #checking if the grid is square
         if hx != hy:
             raise ValueError("The grid is not square")
         h = hx 
+        #initializing the matrix A
         A = np.zeros((self.N**2, self.N**2))
         
+        #filling the matrix A
         for i in range(self.N**2):
             A[i, i] = 4
             if i == 0:
