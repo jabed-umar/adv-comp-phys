@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+#Integration class
 class NumericalIntegration:
     def __init__(self, f, a, b, n):
         "Initialize the function f, the interval [a, b], and the number of subintervals n."

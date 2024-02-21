@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+#Root finding class
+
 class RootFindings:
     def __init__(self, f, a, b, tol, max_iter):
         """This class contains the following root-finding methods: bisection, newton, secant, fixed-point, and regula falsi.
