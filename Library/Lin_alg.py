@@ -37,7 +37,7 @@ class LinearEquationDirect:
             # swapping the row with the maximum element with the current row
             for k in range(n):
                 self.A[i][k], self.A[max_row][k] = self.A[max_row][k], self.A[i][k]
-            self.b[i], self.b[max_row] = self.b[max_row], self.b[i]
+            self.b[i], self.b[max_row] = self.b[max_row], self.b[i] #=============="Here b is a list"==========
             pivot = self.A[i][i]
             # dividing the current row by the maximum element
             for l in range(n):
@@ -81,19 +81,31 @@ class LinearEquationDirect:
             sum = 0 
             for j in range(i+1,n):
                 sum += self.A[i][j]*self.b[j]
-            self.b[i] = (self.b[i] - sum)/self.A[i][i]
+            self.b[i] = (self.b[i] - sum)/self.A[i][i]               #=============="Here b is a list"==========
         return self.b
 
     
-    def Symmetric(self, mat):
-        """Check if a matrix is symmetric"""
-        N = len(mat)
-        for i in range(N):
-            for j in range(N):
-                if mat[i][j] != mat[j][i]:
+    def Symmetric(self,matrix):
+        """
+    Check if a matrix is symmetric.
+
+    Args:
+    matrix (list of lists): The input matrix.
+
+    Returns:
+    bool: True if the matrix is symmetric, False otherwise.
+    """
+        # Check if the matrix is square
+        if len(matrix) != len(matrix[0]):
+            raise ValueError("The matrix is not square")
+
+        # Check if the matrix is symmetric
+        n = len(matrix)
+        for i in range(n):
+            for j in range(i + 1, n):
+                if matrix[i][j] != matrix[j][i]:
                     return False
         return True
-
     def Decompose(self, A):
         """Cholesky Decomposition"""
         n = len(A)
@@ -223,7 +235,7 @@ class LinearEquationIndirect:
         Args:
             A (2-array):  Square matrix of order n (n>=2) made up of coefficinets of the variables
             b (1-array): Vector of order n made up of constants
-            e (precision): convergence criteria
+            e (precision): convergence criteria (10**(-e))
 
         Returns:
         1_d array: Solution vector x
@@ -249,7 +261,52 @@ class LinearEquationIndirect:
                 x[i][0] = c 
             if y == n:   # If all elements of x follow precision condition
                 break  
-        print("Number of iterations is:", v+1,"\nThe solution vector x is:\n") 
+        print("Number of iterations is:", v+1,"\n The solution vector x for gauss seidel method is:\n") 
         print(x)
     
 
+def conjugate_gradient(A, b, x0, tol=1e-6, max_iter=None):
+    """
+    Solve the linear system Ax = b using the conjugate gradient method.
+
+    Parameters:
+    A : numpy.ndarray
+        Coefficient matrix of shape (n, n).
+    b : numpy.ndarray
+        Right-hand side vector of shape (n,).
+    x0 : numpy.ndarray
+        Initial guess for the solution vector of shape (n,).
+    tol : float, optional
+        Tolerance for convergence. Default is 1e-6.
+    max_iter : int, optional
+        Maximum number of iterations. Default is None (no limit).
+
+    Returns:
+    x : numpy.ndarray
+        Solution vector.
+    iter_count : int
+        Number of iterations performed.
+    """
+
+    n = len(b)
+    x = x0.copy()
+    r = b - np.dot(A, x)
+    p = r.copy()
+    iter_count = 0
+
+    while True:
+        iter_count += 1
+        Ap = np.dot(A, p)
+        alpha = np.dot(r.T, r) / np.dot(p.T, Ap)
+        x += alpha * p
+        r_next = r - alpha * Ap
+        if np.linalg.norm(r_next) < tol:
+            break
+        beta = np.dot(r_next.T, r_next) / np.dot(r.T, r)
+        p = r_next + beta * p
+        r = r_next
+
+        if max_iter is not None and iter_count >= max_iter:
+            break
+
+    return x, iter_count
