@@ -310,3 +310,52 @@ def conjugate_gradient(A, b, x0, tol=1e-6, max_iter=None):
             break
 
     return x, iter_count
+
+def dot_product(A, b):
+    # here A is a function and b is a vector
+    n = len(b)
+    result = []
+    for i in range(n):
+        dot_product_sum = 0
+        for j in range(n):
+            dot_product_sum += A(i, j) * b[j]
+        result.append(dot_product_sum)
+    return result
+
+def conjugate_gradient_no_store(A, b, x0, tol = 1e-4, max_iter = 10):
+    """This function solves the linear system Ax = b using the conjugate gradient method without storing the residuals
+
+    Args:
+        A (array): Coefficient matrix of shape (n, n).
+        b (array): Right-hand side vector of shape (n,).
+        x0 (array): Initial guess for the solution vector of shape (n,).
+        tol (float, optional): tolerance . Defaults to 1e-4.
+        max_iter (int, optional): maximum no of iteration. Defaults to 10.
+
+    Returns:
+        array: Solution vector, no of iterations, residuals
+    """
+    n = len(b)
+    x = x0.copy()
+    r = b - dot_product(A, x)
+    p = r.copy()
+    iter_count = 0
+
+    residues = []
+    while True:
+        iter_count += 1
+        Ap = dot_product(A, p)
+        alpha = np.dot(r.T, r) / np.dot(p.T, Ap)
+        x += alpha * p
+        r_next = r - alpha * Ap
+        residues.append(np.linalg.norm(r_next))
+        if np.linalg.norm(r_next) < tol:
+            break
+        beta = np.dot(r_next.T, r_next) / np.dot(r.T, r)
+        p = r_next + beta * p
+        r = r_next
+
+        if max_iter is not None and iter_count >= max_iter:
+            break
+
+    return x, iter_count, residues
