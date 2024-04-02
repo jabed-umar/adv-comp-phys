@@ -264,7 +264,7 @@ class LinearEquationIndirect:
         print("Number of iterations is:", v+1,"\n The solution vector x for gauss seidel method is:\n") 
         print(x)
     
-
+### Conjugate Gradient Method =====================================================================================
 def conjugate_gradient(A, b, x0, tol=1e-6, max_iter=None):
     """
     Solve the linear system Ax = b using the conjugate gradient method.
@@ -311,6 +311,7 @@ def conjugate_gradient(A, b, x0, tol=1e-6, max_iter=None):
 
     return x, iter_count
 
+## Conjugate Gradient Method without storing the matrix ===========================================================
 def dot_product(A, b):
     # here A is a function and b is a vector
     n = len(b)
@@ -359,3 +360,39 @@ def conjugate_gradient_no_store(A, b, x0, tol = 1e-4, max_iter = 10):
             break
 
     return x, iter_count, residues
+
+
+
+## Power iteration method to compute the eigen
+def power_iteration(matrix, tolerance=1e-10, max_iterations=1000):
+    """This code finds out the maximum eigenvalues and eigenvectors of a matrix
+
+    Args:
+        matrix (array): given matrix
+        tolerance (float, optional): the tolerance. Defaults to 1e-10.
+        max_iterations (int, optional): the maximum no of iterations. Defaults to 1000.
+
+    Returns:
+        eigvalue, eigvector: float and list
+    """
+    # Initialize a random vector of appropriate size
+    n = matrix.shape[0]
+    x = np.random.rand(n)
+    x = x / np.linalg.norm(x)  # Normalize the initial vector
+    
+    # Power iteration loop
+    for _ in range(max_iterations):
+        x_new = np.dot(matrix, x)  # Multiply matrix with the vector
+        eigenvalue = np.dot(x, x_new)  # Approximate the eigenvalue
+        x_new = x_new / np.linalg.norm(x_new)  # Normalize the new vector
+        
+        # Check for convergence
+        if np.linalg.norm(x_new - x) < tolerance:
+            break
+        
+        x = x_new
+    
+    eigenvector = x_new
+    return eigenvalue, eigenvector
+
+
