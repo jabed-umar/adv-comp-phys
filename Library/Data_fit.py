@@ -113,3 +113,43 @@ def polynomial_fit(xlist: list,ylist: list,sigma_list: list,degree: int,tol=1e-6
     # a = Gauss_seidel_solve(A_matrix.tolist(),B_matrix.tolist(),T=tol)
     a = np.linalg.solve(A_matrix,B_matrix)    
     return a,A_matrix
+
+
+def modified_chebyshev_polynomial(x,degree):
+    def chebyshev_polynomial(x,degree):
+        if degree == 0:
+            return 1
+        elif degree == 1:
+            return x
+        else:
+            return 2*x*chebyshev_polynomial(x,degree-1) - chebyshev_polynomial(x,degree-2)
+    return chebyshev_polynomial(2*x - 1,degree)
+
+
+
+# Modified Polynomial fit with the chebyshev polynomial Definitiion
+def polynomial_fit_mod_chebyshev(xlist: list, ylist: list,sigma_list: list,degree: int):
+    # Defining the modified chebyshev polynomial
+    def modified_chebyshev_polynomial(x,degree):
+        def chebyshev_polynomial(x,degree):
+            if degree == 0:
+                return 1
+            elif degree == 1:
+                return x
+            else:
+                return 2*x*chebyshev_polynomial(x,degree-1) - chebyshev_polynomial(x,degree-2)
+        return chebyshev_polynomial(2*x - 1,degree)
+    xlist = np.array(xlist)
+    ylist = np.array(ylist)
+    sigma_list = np.array(sigma_list)
+    A_matrix = np.zeros((degree+1,degree+1))
+
+    for i in range(degree+1):
+        for j in range(degree+1):
+            # Replace the polynomial with the modified chebyshev polynomial
+            A_matrix[i][j] = np.sum((modified_chebyshev_polynomial(xlist,i)*modified_chebyshev_polynomial(xlist,j))/(sigma_list**2))
+    B_matrix = np.zeros(degree+1)
+    for i in range(degree+1):
+        B_matrix[i] = np.sum((ylist*(modified_chebyshev_polynomial(xlist,i)))/(sigma_list**2))
+    a = np.linalg.solve(A_matrix,B_matrix)    
+    return a,A_matrix
