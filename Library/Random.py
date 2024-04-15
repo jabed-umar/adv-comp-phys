@@ -45,3 +45,26 @@ def monte_carlo_integration(f, a: float, b: float, n: int, seed: int, a_lcg: int
     return integral 
 
 
+class Random:
+    def __init__(self, seed: float = None, range: list = [0, 1]):
+        if seed is None:
+            import time 
+            seed = int((time.time() * 1e4) % 10) / 10
+            print(f"Seed not provided, using {seed = }.")
+        self.seed = seed
+        self.scale = lambda x: range[0] + x*(range[1]-range[0])
+
+    def uniform(self, a, m):
+        self.seed = (a*self.seed) % m
+        return self.scale(self.seed / m)
+    
+class RandomDist(Random):
+    def __init__(self, seed: float = None, f_inv: callable = lambda x: x, range=[0, 3]):
+        super().__init__(seed)
+        self.transform = f_inv
+        self.range = range
+    def invTransform(self, a=572, m=16381):
+        while True:
+            u = self.transform(self.uniform(a=a, m=m))
+            if u >= self.range[0] and u <= self.range[1]:
+                return u
