@@ -68,3 +68,27 @@ class RandomDist(Random):
             u = self.transform(self.uniform(a=a, m=m))
             if u >= self.range[0] and u <= self.range[1]:
                 return u
+
+# Do the Monte Carlo integration for given probability distribution function
+def monte_carlo_integration_distribution(f, pdf, a: float, b: float, n: int, seed: int, a_lcg: int, c_lcg: int, m_lcg: int = 2**32):
+    '''
+    Monte Carlo Integration
+    # Parameters
+    f: The function to integrate
+    pdf: The probability distribution function
+    - a: Lower limit of the integral
+    - b: Upper limit of the integral
+    - n: Number of random numbers to generate
+    - seed: The seed value for the generator
+    - a_lcg: Multiplier for LCG, range of 0 to m
+    - c_lcg: Increment for LCG, range of 0 to m
+    - m_lcg: Modulus for LCG, defines the range of the random numbers, default is 2^32
+    # Returns
+    - The value of the integral
+    '''
+    random_numbers = np.array(lcg(seed, a_lcg, c_lcg, n, m_lcg))
+    integral = 0
+    for i in random_numbers:
+        integral += f(i*(b-a)+a)/pdf(i*(b-a)+a)
+    integral = (integral/n)
+    return integral
