@@ -94,7 +94,7 @@ def monte_carlo_integration_distribution(f, pdf, a: float, b: float, n: int, see
     return integral
 
 
-class Random:  # better LCG implementation
+class Random_f:  # better LCG implementation
     def __init__(self, func = lambda x: 1, limits=[0, 1], seed: float = None, silent=False, use_own=True):
         if seed is None:
             import time
@@ -111,7 +111,7 @@ class Random:  # better LCG implementation
         else:
             np.random.seed(seed)
 
-    def uniform(self, N, ):
+    def uniform_f(self, N, ):
         N = int(N)  # make sure it's an integer
         if self.use_own:
             ret = []
@@ -121,7 +121,7 @@ class Random:  # better LCG implementation
             return np.array(ret)
         return np.random.rand(N)
 
-    def accept_reject(self, N, margin=2):
+    def accept_reject_f(self, N, margin=2):
         N = int(N)  # make sure it's an integer
         us = self.scale(self.uniform(margin*N))
         ps = self.uniform(margin*N)
