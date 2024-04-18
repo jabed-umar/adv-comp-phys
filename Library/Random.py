@@ -92,3 +92,47 @@ def monte_carlo_integration_distribution(f, pdf, a: float, b: float, n: int, see
         integral += f(i*(b-a)+a)/pdf(i*(b-a)+a)
     integral = (integral/n)
     return integral
+
+
+class Random:  # better LCG implementation
+    def __init__(self, func = lambda x: 1, limits=[0, 1], seed: float = None, silent=False, use_own=True):
+        if seed is None:
+            import time
+            seed = int((time.time() * 1e4) % 10) / 10
+            if not silent: print(f"Seed not provided, using {seed = }.")
+        self.seed = seed
+        self.func = func
+        self.use_own = use_own
+        self.scale = lambda x: limits[0] + x*(limits[1]-limits[0])
+        if use_own:
+            self.a = 1664525
+            self.c = 1013904223
+            self.m = 2**32
+        else:
+            np.random.seed(seed)
+
+    def uniform(self, N, ):
+        N = int(N)  # make sure it's an integer
+        if self.use_own:
+            ret = []
+            for _ in range(N):
+                self.seed = (self.a*self.seed + self.c) % self.m
+                ret.append(self.seed / self.m)
+            return np.array(ret)
+        return np.random.rand(N)
+
+    def accept_reject(self, N, margin=2):
+        N = int(N)  # make sure it's an integer
+        us = self.scale(self.uniform(margin*N))
+        ps = self.uniform(margin*N)
+        chosen = ps < self.func(us)
+        return us[chosen][:N]
+
+def monte_carlo_importance_integrate(ifunc, func, ps, limits):
+    N = len(ps)
+
+    rf1 = ps >= limits[0]
+    rf2 = ps <= limits[1]
+    ps = ps[rf1 & rf2]
+
+    return (ifunc(ps)/func(ps)).sum() / N
