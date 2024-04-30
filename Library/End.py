@@ -100,7 +100,7 @@ def Power_iteration(A, num_iterations):
 
 
 ##Random number generator===========================================================================================================
-def get_rng_random(a, N=int(1e6), seed=21):
+def get_rng_random(a, N=int(1e6), seed=20):
     f = lambda x: 0.5 * (a**2 - x**2)
     g = lambda x: np.exp(-x**2/(2*a**2)) * 0.5 * a**2
 
