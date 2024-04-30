@@ -109,3 +109,32 @@ def get_rng_random(a, N=int(1e6), seed=20):
     p = np.random.rand(N)
 
     return u[p < f(u)/g(u)]
+
+### Datafitting=====================================================================================================================
+def polynomial_fit(xlist: list,ylist: list,sigma_list: list,degree: int,tol=1e-6):
+    '''
+    # Polynomial Fitting
+    This function finds the best fit polynomial for a given set of data points
+    Finds the fit for the equation y = a0 + a1*x + a2*x^2 + ... + an*x^n
+    ## Parameters
+    - xlist: The x-coordinates of the data points
+    - ylist: The y-coordinates of the data points
+    - sigma_list: The error in the y-coordinates of the data points
+    - degree: The degree of the polynomial to be fit
+    ## Returns
+    - a: The coefficients of the best fit polynomial
+    '''
+    xlist = np.array(xlist)
+    ylist = np.array(ylist)
+    sigma_list = np.array(sigma_list)
+    A_matrix = np.zeros((degree+1,degree+1))
+
+    for i in range(degree+1):
+        for j in range(degree+1):
+            A_matrix[i][j] = np.sum((xlist**(i+j))/(sigma_list**2))
+    B_matrix = np.zeros(degree+1)
+    for i in range(degree+1):
+        B_matrix[i] = np.sum((ylist*(xlist**i))/(sigma_list**2))
+    # a = Gauss_seidel_solve(A_matrix.tolist(),B_matrix.tolist(),T=tol)
+    a = np.linalg.solve(A_matrix,B_matrix)    
+    return a,A_matrix
