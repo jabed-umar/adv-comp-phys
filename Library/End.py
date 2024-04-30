@@ -96,3 +96,16 @@ def Power_iteration(A, num_iterations):
     eigenvector = x
 
     return eigenvalue, eigenvector
+
+
+
+##Random number generator===========================================================================================================
+def get_rng_random(a, N=int(1e6), seed=21):
+    f = lambda x: 0.5 * (a**2 - x**2)
+    g = lambda x: np.exp(-x**2/(2*a**2)) * 0.5 * a**2
+
+    np.random.seed(seed)
+    u = np.random.randn(N)*a
+    p = np.random.rand(N)
+
+    return u[p < f(u)/g(u)]
