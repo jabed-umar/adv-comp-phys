@@ -123,6 +123,7 @@ def polynomial_fit(xlist: list,ylist: list,sigma_list: list,degree: int,tol=1e-6
     - degree: The degree of the polynomial to be fit
     ## Returns
     - a: The coefficients of the best fit polynomial
+    - A_matrix: Inverse of the matrix of covariances
     '''
     xlist = np.array(xlist)
     ylist = np.array(ylist)
